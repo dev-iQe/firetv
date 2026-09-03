@@ -1,4 +1,4 @@
-name: Build iOS App (IPA)
+name: Build App for eSign
 
 on:
   push:
@@ -16,19 +16,9 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Expo CLI & EAS CLI
-        run: npm install -g expo-cli eas-cli
-
       - name: Install dependencies
         run: npm install
 
-      - name: Configure EAS Project
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      - name: Build Web / Bundle export for eSign packaging
         run: |
-          eas project:init --force --non-interactive || true
-
-      - name: Build iOS IPA
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas build --platform ios --profile preview --non-interactive --no-wait
+          npx expo export --platform ios
