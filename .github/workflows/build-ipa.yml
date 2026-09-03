@@ -16,18 +16,19 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Expo CLI
-        run: npm install -g eas-cli
+      - name: Install Expo CLI & EAS CLI
+        run: npm install -g expo-cli eas-cli
 
       - name: Install dependencies
         run: npm install
 
-      - name: Initialize EAS Project
+      - name: Configure EAS Project
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas init --id auto --non-interactive
+        run: |
+          eas project:init --force --non-interactive || true
 
-      - name: Build project with EAS
+      - name: Build iOS IPA
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas build --platform ios --profile preview --non-interactive
+        run: eas build --platform ios --profile preview --non-interactive --no-wait
