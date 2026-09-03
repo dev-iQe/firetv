@@ -1,0 +1,28 @@
+name: Build iOS App (IPA)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Expo CLI
+        run: npm install -g eas-cli
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project with EAS
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas build --platform ios --profile preview --non-interactive
