@@ -19,6 +19,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build Web / Bundle export for eSign packaging
+      - name: Export iOS Bundle
+        run: npx expo export --platform ios
+
+      - name: Archive and Prepare for eSign
         run: |
-          npx expo export --platform ios
+          mkdir -p Payload
+          mv dist Payload/FireTV.app || cp -r dist Payload/FireTV.app
+          zip -r FireTV-eSign.zip Payload
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FireTV-eSign
+          path: FireTV-eSign.zip
