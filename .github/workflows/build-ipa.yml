@@ -15,21 +15,29 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm install
 
-      - name: Export iOS Bundle
-        run: npx expo export --platform ios
+      - name: Prebuild iOS Project
+        run: npx expo prebuild --platform ios --clean
 
-      - name: Archive and Prepare for eSign
+      - name: Build App Archive via Xcode
+        run: |
+          cd ios
+          xcodebuild -workspace FireTV.xcworkspace -scheme FireTV -sdk iphoneos -configuration Release -derivedDataPath build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+
+      - name: Package IPA for eSign
         run: |
           mkdir -p Payload
-          mv dist Payload/FireTV.app || cp -r dist Payload/FireTV.app
-          zip -r FireTV-eSign.zip Payload
+          # نقل ملف الـ .app الناتج من مجلد البناء إلى داخل Payload
+          cp -r ios/build/Build/Products/Release-iphoneos/*.app Payload/
+          zip -r FireTV-eSign.ipa Payload
+          rm -rf Payload
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: FireTV-eSign
-          path: FireTV-eSign.zip
+          path: FireTV-eSign.ipa
