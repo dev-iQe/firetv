@@ -1,14 +1,14 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { ThemeProvider } from './src/context/ThemeContext';
-import AppNavigator from './src/navigation/AppNavigator';
 import { StatusBar } from 'expo-status-bar';
+import { NavigationContainer } from '@react-navigation/native';
+import { ThemeProvider } from './src/context/ThemeContext'; // تأكد من المسار
+import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App() {
   return (
     <ThemeProvider>
+      <StatusBar style="light" />
       <NavigationContainer>
-        <StatusBar style="light" />
         <AppNavigator />
       </NavigationContainer>
     </ThemeProvider>
