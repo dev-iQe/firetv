@@ -22,9 +22,10 @@ jobs:
       - name: Prebuild iOS Project
         run: npx expo prebuild --platform ios --clean
 
-      - name: Build App Archive via Xcode
+      - name: Build and Bundle Release IPA
         run: |
           cd ios
+          pod install
           xcodebuild -workspace FireTV.xcworkspace -scheme FireTV -sdk iphoneos -configuration Release -derivedDataPath build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
 
       - name: Package IPA for eSign
