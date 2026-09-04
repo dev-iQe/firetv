@@ -15,7 +15,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
 
       - name: Install dependencies
         run: npm install
@@ -31,7 +30,6 @@ jobs:
       - name: Package IPA for eSign
         run: |
           mkdir -p Payload
-          # نقل ملف الـ .app الناتج من مجلد البناء إلى داخل Payload
           cp -r ios/build/Build/Products/Release-iphoneos/*.app Payload/
           zip -r FireTV-eSign.ipa Payload
           rm -rf Payload
