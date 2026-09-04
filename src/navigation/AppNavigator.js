@@ -1,8 +1,9 @@
 import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
+// استيراد الشاشات
 import HomeScreen from '../screens/HomeScreen';
 import TrailerScreen from '../screens/TrailerScreen';
 import SavedScreen from '../screens/SavedScreen';
@@ -10,8 +11,8 @@ import DownloadScreen from '../screens/DownloadScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
+const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
 
 function HomeTabs() {
   return (
@@ -21,12 +22,12 @@ function HomeTabs() {
         tabBarStyle: { backgroundColor: '#0b0f19', borderTopColor: '#1e293b' },
         tabBarActiveTintColor: '#3b82f6',
         tabBarInactiveTintColor: '#94a3b8',
-        tabBarIcon: ({ color, size }) => {
+        tabBarIcon: ({ focused, color, size }) => {
           let iconName;
-          if (route.name === 'Home') iconName = 'home';
-          else if (route.name === 'Trailer') iconName = 'film';
-          else if (route.name === 'Saved') iconName = 'bookmark';
-          else if (route.name === 'Download') iconName = 'download';
+          if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
+          else if (route.name === 'Trailer') iconName = focused ? 'play-circle' : 'play-circle-outline';
+          else if (route.name === 'Saved') iconName = focused ? 'bookmark' : 'bookmark-outline';
+          else if (route.name === 'Download') iconName = focused ? 'download' : 'download-outline';
           return <Ionicons name={iconName} size={size} color={color} />;
         },
       })}
