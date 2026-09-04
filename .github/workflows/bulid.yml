@@ -3,7 +3,7 @@ name: Build Unsigned IPA (for Esign)
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:  # يتيح التشغيل يدوياً من تبويب Actions
+  workflow_dispatch:  # يتيح لك الضغط على زر "Run workflow" يدوياً
 
 jobs:
   build-ios:
@@ -16,11 +16,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20          # تم التحديث من 18 إلى 20 (LTS)
           cache: 'npm'
 
+      # ✅ الحل السحري: استخدم install بدلاً من ci (لأن ملف lock غير موجود بالمستودع)
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Install Expo CLI
         run: npm install -g expo-cli
@@ -29,21 +30,20 @@ jobs:
       - name: Generate iOS native project
         run: npx expo prebuild --platform ios --clean
 
-      # استخراج اسم المشروع مع إزالة المسافات (لأن Scheme لا يحب المسافات)
+      # استخراج اسم المشروع وإزالة المسافات ليتوافق مع Xcode Scheme
       - name: Get project name
         id: project_name
         run: |
-          # جلب الاسم من app.json وإزالة أي مسافات بيضاء
           RAW_NAME=$(node -p "require('./app.json').expo.name")
           CLEAN_NAME=$(echo "$RAW_NAME" | tr -d ' ')
           echo "PROJECT_NAME=$CLEAN_NAME" >> $GITHUB_ENV
           echo "Cleaned project name: $CLEAN_NAME"
 
-      # بناء التطبيق بدون أي توقيع (Unsigned)
+      # بناء التطبيق بدون أي توقيع (Unsigned) مع تجاهل التوقيع تماماً
       - name: Build unsigned .app
         run: |
           cd ios
-          # وضع اسم المشروع بين علامات اقتباس مزدوجة لتفادي مشكلة المسافات
+          # بناء الأرشيف
           xcodebuild -workspace *.xcworkspace \
             -scheme "${{ env.PROJECT_NAME }}" \
             -configuration Release \
@@ -55,9 +55,12 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             PROVISIONING_PROFILE_SPECIFIER=""
           
-          # استخراج ملف .app من الأرشيف ووضعه في مجلد Payload
+          # تحضير مجلد Payload
           mkdir -p Payload
-          cp -R build/${{ env.PROJECT_NAME }}.xcarchive/Products/Applications/${{ env.PROJECT_NAME }}.app Payload/
+          
+          # ✅ البحث التلقائي عن ملف .app داخل الأرشيف (أكثر أماناً من كتابة الاسم يدوياً)
+          APP_PATH=$(find build/${{ env.PROJECT_NAME }}.xcarchive/Products/Applications -name "*.app" | head -n 1)
+          cp -R "$APP_PATH" Payload/
 
       # ضغط مجلد Payload إلى ملف .ipa (غير موقع)
       - name: Package as unsigned .ipa
@@ -65,7 +68,7 @@ jobs:
           zip -r ${{ env.PROJECT_NAME }}.ipa Payload
           echo "Unsigned IPA created successfully"
 
-      # رفع الملف الناتج (ستجده في قسم Artifacts)
+      # رفع الملف الناتج (ستجده في قسم Artifacts بعد انتهاء التشغيل)
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
